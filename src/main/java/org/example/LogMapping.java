@@ -18,7 +18,7 @@ public class LogMapping {
                         e.getDate().toLocalDate(),
                         e.getTargetUser(),
                         LogOptions.Operation.received,
-                        e.getAmount(),
+                        e.getAmount().doubleValue(),
                         e.getUser()
                 );
                 map.computeIfAbsent(e.getTargetUser(), k -> new ArrayList<>()).add(in);

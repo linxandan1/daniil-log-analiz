@@ -1,0 +1,4 @@
+[2025-05-09 00:00:00] userA balance inquiry 1000,00
+[2025-05-10 00:00:00] userA withdrew 200,00
+[2025-05-11 00:00:00] userA received 150,50 from userB
+[2025-06-10 23:41:03] userA final balance 950,50

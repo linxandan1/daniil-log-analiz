@@ -1,5 +1,6 @@
 package org.example;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -8,7 +9,7 @@ public class LogRequest {
     private LocalDateTime date;
     private String user;
     private LogOptions.Operation operationType;
-    private double amount;
+    private BigDecimal amount;
     private String targetUser;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -17,7 +18,7 @@ public class LogRequest {
         this.date = date.atStartOfDay();
         this.user = user;
         this.operationType = operationType;
-        this.amount = amount;
+        this.amount = BigDecimal.valueOf(amount);
         this.targetUser = targetUser;
     }
 
@@ -34,7 +35,7 @@ public class LogRequest {
         return operationType;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 

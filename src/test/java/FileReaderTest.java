@@ -6,6 +6,7 @@ import org.example.LogWriter;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -29,7 +30,7 @@ public class FileReaderTest {
         Files.createFile(tempDirectory.resolve("a.log"));
         Files.createFile(tempDirectory.resolve("b.txt"));
         List<Path> logFiles = new FileReader().listLogFiles(tempDirectory);
-        assertEquals(1, logFiles.size());
+        assertEquals("Только 1 файл",1, logFiles.size());
     }
 
     @Test
@@ -41,8 +42,8 @@ public class FileReaderTest {
         );
         Map<String, List<LogRequest>> map = new LogMapping().logMapping(logs);
 
-        assertEquals(1, map.get("A").size());
-        assertEquals(3, map.get("B").size());
+        assertEquals("у юзера А - 1 лог",1, map.get("A").size());
+        assertEquals("у юзера В - 3 лога",3, map.get("B").size());
     }
 
     @Test
@@ -54,6 +55,7 @@ public class FileReaderTest {
         );
         Map<String, List<LogRequest>> map = new LogMapping().logMapping(logs);
 
+        // обратная проверка, возможно не нужна, но пусть будет
         assertNotEquals(100, map.get("A").size());
         assertNotEquals(100, map.get("B").size());
     }
@@ -81,7 +83,7 @@ public class FileReaderTest {
         String expectedUserA_received = String.format("[%s] %s received %.2f from %s", LocalDate.of(2025, 5, 10).atStartOfDay().format(FORMATTER), "userA", 150.50, "userB");
         String expectedUserA_log3 = String.format("[%s] %s withdrew %.2f", LocalDate.of(2025, 5, 11).atStartOfDay().format(FORMATTER), "userA", 200.00);
 
-        assertEquals(3, userALines.size());
+        assertEquals(4, userALines.size());
         assertEquals(expectedUserA_log1, userALines.get(0));
         assertEquals(expectedUserA_received, userALines.get(1));
         assertEquals(expectedUserA_log3, userALines.get(2));
@@ -92,8 +94,54 @@ public class FileReaderTest {
 
         String expectedUserB_log2 = String.format("[%s] %s transferred %.2f to %s", LocalDate.of(2025, 5, 10).atStartOfDay().format(FORMATTER), "userB", 150.50, "userA");
 
-        assertEquals(1, userBLines.size());
+        assertEquals(2, userBLines.size());
         assertEquals(expectedUserB_log2, userBLines.get(0));
+    }
+
+    @Test
+    public void testFinalBalanceCalculationAndAppendNoRegex() throws IOException {
+        List<LogRequest> logsUserA = Arrays.asList(
+                new LogRequest(LocalDate.of(2025, 5, 9), "userA", LogOptions.Operation.balance_inquiry, 1000.00, null),
+                new LogRequest(LocalDate.of(2025, 5, 10), "userA", LogOptions.Operation.withdrew, 200.00, null),
+                new LogRequest(LocalDate.of(2025, 5, 11), "userA", LogOptions.Operation.received, 150.50, "userB")
+        );
+        // Ожидаемый баланс: 1000.00 - 200.00 + 150.50 = 950.50
+        BigDecimal expectedBalanceA = new BigDecimal("950.50");
+
+        List<LogRequest> logsUserC = Arrays.asList(
+                new LogRequest(LocalDate.of(2025, 5, 10), "userC", LogOptions.Operation.transferred, 50.00, "userD"),
+                new LogRequest(LocalDate.of(2025, 5, 11), "userC", LogOptions.Operation.withdrew, 25.00, null)
+        );
+        // Ожидаемый баланс: 0 - 50.00 - 25.00 = -75.00
+        BigDecimal expectedBalanceC = new BigDecimal("-75.00");
+
+        Map<String, List<LogRequest>> userLogsMap = Map.of(
+                "userA", logsUserA,
+                "userC", logsUserC
+        );
+
+        Path outputDir = Files.createTempDirectory("Test_logs");
+        LogWriter writer = new LogWriter();
+        writer.writeLogs(outputDir, userLogsMap);
+
+        // Проверка userA
+        Path userAFile = outputDir.resolve("userA.log");
+        List<String> userALines = Files.readAllLines(userAFile);
+        String finalBalanceLineA = userALines.get(userALines.size() - 1);
+
+        String expectedPartialLineA = String.format("userA final balance %.2f", expectedBalanceA.doubleValue());
+        assertTrue("Должна быть строка финального баланса", finalBalanceLineA.contains(expectedPartialLineA));
+        assertTrue("Дата должны быть текущей", finalBalanceLineA.startsWith("[2025-06"));
+
+
+        // Проверка userC
+        Path userCFile = outputDir.resolve("userC.log");
+        List<String> userCLines = Files.readAllLines(userCFile);
+        String finalBalanceLineC = userCLines.get(userCLines.size() - 1);
+
+        String expectedPartialLineC = String.format("userC final balance %.2f", expectedBalanceC.doubleValue());
+        assertTrue("Должна быть строка финального баланса", finalBalanceLineC.contains(expectedPartialLineC));
+        assertTrue("Дата должны быть текущей", finalBalanceLineC.startsWith("[2025-06"));
     }
 
 }
