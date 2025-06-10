@@ -1,0 +1,1 @@
+LogRequest{date=2025-05-10, user='userB', operationType=transferred, amount=150.5, targetUser='userA'}

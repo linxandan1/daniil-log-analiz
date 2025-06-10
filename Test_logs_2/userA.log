@@ -1,0 +1,3 @@
+LogRequest{date=2025-05-09, user='userA', operationType=balance_inquiry, amount=1000.0, targetUser='null'}
+LogRequest{date=2025-05-10, user='userA', operationType=received, amount=150.5, targetUser='userB'}
+LogRequest{date=2025-05-11, user='userA', operationType=withdrew, amount=200.0, targetUser='null'}

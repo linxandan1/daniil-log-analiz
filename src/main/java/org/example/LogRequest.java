@@ -6,10 +6,10 @@ public class LogRequest {
     private LocalDate date;
     private String user;
     private LogOptions.Operation operationType;
-    private long amount;
+    private double amount;
     private String targetUser;
 
-    public LogRequest(LocalDate date, String user, LogOptions.Operation operationType, long amount, String targetUser) {
+    public LogRequest(LocalDate date, String user, LogOptions.Operation operationType, double amount, String targetUser) {
         this.date = date;
         this.user = user;
         this.operationType = operationType;
@@ -30,11 +30,22 @@ public class LogRequest {
         return operationType;
     }
 
-    public long getAmount() {
+    public double getAmount() {
         return amount;
     }
 
     public String getTargetUser() {
         return targetUser;
+    }
+
+    @Override
+    public String toString() {
+        return "LogRequest{" +
+                "date=" + date +
+                ", user='" + user + '\'' +
+                ", operationType=" + operationType +
+                ", amount=" + amount +
+                ", targetUser='" + targetUser + '\'' +
+                '}';
     }
 }
