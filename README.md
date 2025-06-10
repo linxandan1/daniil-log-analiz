@@ -25,3 +25,6 @@
 Использую:
 * Maven
 * Java: 22.0.2
+
+src/main/resources/logs - папка с логами \
+src/main/transactions_by_users - вывод
