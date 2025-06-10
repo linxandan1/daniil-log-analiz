@@ -15,7 +15,7 @@ public class LogMapping {
 
             if (e.getOperationType() == LogOptions.Operation.transferred) {
                 LogRequest in = new LogRequest(
-                        e.getDate(),
+                        e.getDate().toLocalDate(),
                         e.getTargetUser(),
                         LogOptions.Operation.received,
                         e.getAmount(),

@@ -4,10 +4,12 @@ import org.example.LogRequest;
 import org.example.LogMapping;
 import org.example.LogWriter;
 import org.junit.Test;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class FileReaderTest {
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // Проверка, правильно ли читаются файлы: .log only
     @Test
@@ -73,16 +77,23 @@ public class FileReaderTest {
         assertTrue(Files.exists(userAFile));
         List<String> userALines = Files.readAllLines(userAFile);
 
+        String expectedUserA_log1 = String.format("[%s] %s balance inquiry %.2f", LocalDate.of(2025, 5, 9).atStartOfDay().format(FORMATTER), "userA", 1000.00);
+        String expectedUserA_received = String.format("[%s] %s received %.2f from %s", LocalDate.of(2025, 5, 10).atStartOfDay().format(FORMATTER), "userA", 150.50, "userB");
+        String expectedUserA_log3 = String.format("[%s] %s withdrew %.2f", LocalDate.of(2025, 5, 11).atStartOfDay().format(FORMATTER), "userA", 200.00);
+
         assertEquals(3, userALines.size());
-        assertEquals(log1.toString(), userALines.get(0)); // 2025-05-09
-        assertEquals(log3.toString(), userALines.get(2)); // 2025-05-11
+        assertEquals(expectedUserA_log1, userALines.get(0));
+        assertEquals(expectedUserA_received, userALines.get(1));
+        assertEquals(expectedUserA_log3, userALines.get(2));
 
         Path userBFile = outputDir.resolve("userB.log");
         assertTrue(Files.exists(userBFile));
         List<String> userBLines = Files.readAllLines(userBFile);
+
+        String expectedUserB_log2 = String.format("[%s] %s transferred %.2f to %s", LocalDate.of(2025, 5, 10).atStartOfDay().format(FORMATTER), "userB", 150.50, "userA");
+
         assertEquals(1, userBLines.size());
-        assertEquals(log2.toString(), userBLines.get(0)); // 2025-05-10
+        assertEquals(expectedUserB_log2, userBLines.get(0));
     }
-    
 
 }

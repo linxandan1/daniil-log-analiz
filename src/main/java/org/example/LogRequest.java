@@ -1,16 +1,20 @@
 package org.example;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class LogRequest {
-    private LocalDate date;
+    private LocalDateTime date;
     private String user;
     private LogOptions.Operation operationType;
     private double amount;
     private String targetUser;
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     public LogRequest(LocalDate date, String user, LogOptions.Operation operationType, double amount, String targetUser) {
-        this.date = date;
+        this.date = date.atStartOfDay();
         this.user = user;
         this.operationType = operationType;
         this.amount = amount;
@@ -18,7 +22,7 @@ public class LogRequest {
     }
 
 
-    public LocalDate getDate() {
+    public LocalDateTime  getDate() {
         return date;
     }
 
@@ -40,12 +44,19 @@ public class LogRequest {
 
     @Override
     public String toString() {
-        return "LogRequest{" +
-                "date=" + date +
-                ", user='" + user + '\'' +
-                ", operationType=" + operationType +
-                ", amount=" + amount +
-                ", targetUser='" + targetUser + '\'' +
-                '}';
+        String formattedDate = date.format(FORMATTER);
+
+        switch (operationType) {
+            case transferred:
+                return String.format("[%s] %s transferred %.2f to %s", formattedDate, user, amount, targetUser);
+            case received:
+                return String.format("[%s] %s received %.2f from %s", formattedDate, user, amount, targetUser);
+            case withdrew:
+                return String.format("[%s] %s withdrew %.2f", formattedDate, user, amount);
+            case balance_inquiry:
+                return String.format("[%s] %s balance inquiry %.2f", formattedDate, user, amount);
+            default:
+                return "Unknown operation";
+        }
     }
 }
